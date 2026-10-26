@@ -206,4 +206,10 @@ elif menu == "ℹ️ Panduan Singkat":
     st.header("ℹ️ Ringkasan Pembagian Huruf")
     st.markdown("""
     * **Gojūon (Huruf Dasar):** Huruf vokal baku (A, I, U, E, O) dan turunan dasarnya.
-    * **Dakuon (`"`) & Handakuon (`°
+    * **Dakuon (`"`) & Handakuon (`°`):** Huruf dengan tanda *tenten* (misal: か `ka` → が `ga`) dan *maru* (misal: は `ha` → ぱ `pa`).
+    * **Yōon (Huruf Gabungan Kecil):** Huruf gabungan dengan `ya`, `yu`, `yo` kecil.
+      * *Contoh kelompok **Pya/Pyu/Pyo***:
+        * ぴ + ゃ = **ぴゃ (pya)**
+        * ぴ + ゅ = **ぴゅ (pyu)**
+        * ぴ + ょ = **ぴょ (pyo)**
+    """)
