@@ -45,11 +45,7 @@ HIRAGANA_DATA = {
     }
 }
 
-ALL_ITEMS = []
-for kat in HIRAGANA_DATA.values():
-    for sub in kat.values():
-        ALL_ITEMS.extend(sub)
-
+# --- SIDEBAR NAVIGASI ---
 st.sidebar.title("🌸 Belajar Hiragana")
 menu = st.sidebar.radio(
     "Pilih Modul:",
@@ -60,16 +56,34 @@ st.title("🇯🇵 Modul Belajar Hiragana Lengkap")
 
 if menu == "📖 Daftar & Kartu Hiragana":
     st.header("📖 Katalog Huruf Hiragana")
-    kategori = st.selectbox("Pilih Kelompok Huruf:", list(HIRAGANA_DATA.keys()))
-    sub_kategori = st.selectbox("Pilih Baris/Kelompok:", list(HIRAGANA_DATA[kategori].keys()))
-    list_huruf = HIRAGANA_DATA[kategori][sub_kategori]
-    st.write(f"### Kelompok: **{sub_kategori}**")
-    cols = st.columns(len(list_huruf) if len(list_huruf) <= 5 else 3)
-    for idx, (kana, romaji) in enumerate(list_huruf):
-        with cols[idx % len(cols)]:
-            with st.container(border=True):
-                st.markdown(f"<h1 style='text-align: center; margin: 0;'>{kana}</h1>", unsafe_allow_html=True)
-                st.markdown(f"<h3 style='text-align: center; color: #1E88E5; margin: 0;'>[{romaji}]</h3>", unsafe_allow_html=True)
+    
+    mode_tampil = st.radio("Pilih Tampilan Katalog:", ["Semua Kategori Sekaligus", "Pilih Per Kelompok / Terpisah"], horizontal=True)
+    
+    if mode_tampil == "Semua Kategori Sekaligus":
+        for kat_name, kat_dict in HIRAGANA_DATA.items():
+            st.markdown(f"### 📌 {kat_name}")
+            for sub_name, list_huruf in kat_dict.items():
+                st.write(f"**{sub_name}**")
+                cols = st.columns(len(list_huruf) if len(list_huruf) <= 5 else 3)
+                for idx, (kana, romaji) in enumerate(list_huruf):
+                    with cols[idx % len(cols)]:
+                        with st.container(border=True):
+                            st.markdown(f"<h1 style='text-align: center; margin: 0;'>{kana}</h1>", unsafe_allow_html=True)
+                            st.markdown(f"<h3 style='text-align: center; color: #1E88E5; margin: 0;'>[{romaji}]</h3>", unsafe_allow_html=True)
+            st.markdown("---")
+    else:
+        kategori = st.selectbox("Pilih Kelompok Utama:", list(HIRAGANA_DATA.keys()))
+        sub_kategori = st.selectbox("Pilih Baris/Kelompok:", list(HIRAGANA_DATA[kategori].keys()))
+        
+        list_huruf = HIRAGANA_DATA[kategori][sub_kategori]
+        st.write(f"### Kelompok: **{sub_kategori}**")
+        
+        cols = st.columns(len(list_huruf) if len(list_huruf) <= 5 else 3)
+        for idx, (kana, romaji) in enumerate(list_huruf):
+            with cols[idx % len(cols)]:
+                with st.container(border=True):
+                    st.markdown(f"<h1 style='text-align: center; margin: 0;'>{kana}</h1>", unsafe_allow_html=True)
+                    st.markdown(f"<h3 style='text-align: center; color: #1E88E5; margin: 0;'>[{romaji}]</h3>", unsafe_allow_html=True)
 
 elif menu == "🎯 Kuis Tebak Huruf":
     st.header("🎯 Kuis Latihan Tebak Huruf Hiragana")
@@ -86,9 +100,28 @@ elif menu == "🎯 Kuis Tebak Huruf":
 
     if not st.session_state.kuis_berjalan:
         st.subheader("⚙️ Pengaturan Kuis")
+        
+        pilihan_kategori_kuis = st.selectbox(
+            "Pilih Kategori Huruf untuk Kuis:",
+            ["Semua Kategori (Campur)", "1. Gojūon (Huruf Dasar)", "2. Dakuon & Handakuon (Tenten & Maru)", "3. Yōon (Gabungan Ya, Yu, Yo Kecil)"]
+        )
+        
         target_soal = st.selectbox("Pilih Jumlah Soal:", [5, 10, 15, 20], index=0)
+
         if st.button("🚀 Mulai Kuis Sekarang", type="primary"):
-            st.session_state.soal_list = random.sample(ALL_ITEMS, target_soal)
+            pool_soal = []
+            if pilihan_kategori_kuis == "Semua Kategori (Campur)":
+                for kat in HIRAGANA_DATA.values():
+                    for sub in kat.values():
+                        pool_soal.extend(sub)
+            else:
+                kat_terpilih = HIRAGANA_DATA[pilihan_kategori_kuis]
+                for sub in kat_terpilih.values():
+                    pool_soal.extend(sub)
+            
+            jumlah_ambil = min(target_soal, len(pool_soal))
+            
+            st.session_state.soal_list = random.sample(pool_soal, jumlah_ambil)
             st.session_state.index_soal = 0
             st.session_state.skor = 0
             st.session_state.riwayat_jawaban = []
@@ -109,7 +142,6 @@ elif menu == "🎯 Kuis Tebak Huruf":
         with col_q2:
             st.subheader("Bagaimana cara membaca huruf tersebut?")
             with st.form(key=f"form_kuis_{idx_sekarang}"):
-                # Key dinamis agar elemen input selalu dikenali sebagai objek baru tiap soal
                 jawaban_user = st.text_input("Ketik Romaji (contoh: pya, ka, shi, dsb):", key=f"input_box_{idx_sekarang}").strip().lower()
                 btn_jawab = st.form_submit_button("Submit Jawaban ➡️", type="primary")
                 if btn_jawab:
@@ -126,7 +158,6 @@ elif menu == "🎯 Kuis Tebak Huruf":
                     st.session_state.index_soal += 1
                     st.rerun()
         
-        # JavaScript dengan polling cepat untuk memastikan fokus menempel di kotak input baru
         components.html(
             """
             <script>
@@ -159,10 +190,13 @@ elif menu == "🎯 Kuis Tebak Huruf":
         total_soal = len(st.session_state.soal_list)
         skor_akhir = st.session_state.skor
         persentase = int((skor_akhir / total_soal) * 100)
+
         st.metric("Hasil Akhir Kamu:", f"{skor_akhir} / {total_soal} Soal Benar", delta=f"{persentase}% Nilai")
+
         st.markdown("---")
         st.subheader("📊 Pembahasan & Evaluasi Jawaban Kamu")
         st.dataframe(st.session_state.riwayat_jawaban, use_container_width=True)
+
         st.markdown("---")
         if st.button("🔄 Ulangi Kuis Baru", type="primary"):
             st.session_state.kuis_berjalan = False
@@ -171,7 +205,5 @@ elif menu == "🎯 Kuis Tebak Huruf":
 elif menu == "ℹ️ Panduan Singkat":
     st.header("ℹ️ Ringkasan Pembagian Huruf")
     st.markdown("""
-    * **Go jūon (Huruf Dasar):** Huruf vokal baku (A, I, U, E, O) dan turunan dasarnya.
-    * **Dakuon (`"`) & Handakuon (`°`):** Huruf dengan tanda *tenten* dan *maru*.
-    * **Yōon (Huruf Gabungan Kecil):** Huruf gabungan dengan `ya`, `yu`, `yo` kecil.
-    """)
+    * **Gojūon (Huruf Dasar):** Huruf vokal baku (A, I, U, E, O) dan turunan dasarnya.
+    * **Dakuon (`"`) & Handakuon (`°
