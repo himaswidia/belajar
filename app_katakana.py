@@ -227,4 +227,5 @@ elif menu == "ℹ️ Panduan Singkat":
       * *Contoh kelompok **Pya/Pyu/Pyo***:
         * ピ + ャ = **ピャ (pya)**
         * ピ + ュ = **ピュ (pyu)**
-        * ピ +
+        * ピ + ョ = **ピョ (pyo)**
+    """)
