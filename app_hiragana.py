@@ -109,7 +109,8 @@ elif menu == "🎯 Kuis Tebak Huruf":
         with col_q2:
             st.subheader("Bagaimana cara membaca huruf tersebut?")
             with st.form(key=f"form_kuis_{idx_sekarang}"):
-                jawaban_user = st.text_input("Ketik Romaji (contoh: pya, ka, shi, dsb):").strip().lower()
+                # Key dinamis agar elemen input selalu dikenali sebagai objek baru tiap soal
+                jawaban_user = st.text_input("Ketik Romaji (contoh: pya, ka, shi, dsb):", key=f"input_box_{idx_sekarang}").strip().lower()
                 btn_jawab = st.form_submit_button("Submit Jawaban ➡️", type="primary")
                 if btn_jawab:
                     is_correct = (jawaban_user == soal_romaji)
@@ -125,7 +126,7 @@ elif menu == "🎯 Kuis Tebak Huruf":
                     st.session_state.index_soal += 1
                     st.rerun()
         
-        # JavaScript dengan retry interval untuk memastikan fokus selalu aktif setiap soal baru
+        # JavaScript dengan polling cepat untuk memastikan fokus menempel di kotak input baru
         components.html(
             """
             <script>
@@ -143,10 +144,10 @@ elif menu == "🎯 Kuis Tebak Huruf":
                 let attempts = 0;
                 const interval = setInterval(function() {
                     attempts++;
-                    if (focusInput() || attempts > 20) {
+                    if (focusInput() || attempts > 30) {
                         clearInterval(interval);
                     }
-                }, 50);
+                }, 30);
             </script>
             """,
             height=0
