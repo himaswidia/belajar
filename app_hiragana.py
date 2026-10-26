@@ -125,17 +125,28 @@ elif menu == "🎯 Kuis Tebak Huruf":
                     st.session_state.index_soal += 1
                     st.rerun()
         
-        # JavaScript untuk auto-focus ke kotak input teks secara otomatis
+        # JavaScript dengan retry interval untuk memastikan fokus selalu aktif setiap soal baru
         components.html(
             """
             <script>
-                setTimeout(function() {
+                function focusInput() {
                     const doc = window.parent.document;
                     const inputs = doc.querySelectorAll('input[type="text"]');
                     if (inputs.length > 0) {
-                        inputs[inputs.length - 1].focus();
+                        const targetInput = inputs[inputs.length - 1];
+                        targetInput.focus();
+                        return true;
                     }
-                }, 100);
+                    return false;
+                }
+                
+                let attempts = 0;
+                const interval = setInterval(function() {
+                    attempts++;
+                    if (focusInput() || attempts > 20) {
+                        clearInterval(interval);
+                    }
+                }, 50);
             </script>
             """,
             height=0
